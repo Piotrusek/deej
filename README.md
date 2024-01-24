@@ -61,16 +61,15 @@ deej is written in Go and [distributed](https://github.com/omriharel/deej/releas
 
 ### Hardware
 
-- The sliders are connected to 5 (or as many as you like) analog pins on an Arduino Nano/Uno board. They're powered from the board's 5V output (see schematic)
-- The board connects via a USB cable to the PC
+I don't realy know how to explain how it works becouse it is overly complicated but feel free to message me for an explenation. I'll be hapy to explain.
 
 #### Schematic
-
-![Hardware schematic](assets/schematic.png)
+No schematic yet
+![Hardware schematic](link)
 
 ### Software
 
-- The code running on the Arduino board is a [C program](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino) constantly writing current slider values over its serial interface
+- The code running on the Arduino board is a [C program](./arduino/deej-2-faders/deej-2-faders.ino) constantly writing current slider values over its serial interface
 - The PC runs a lightweight [Go client](./pkg/deej/cmd/main.go) in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
 
 ## Slider mapping (configuration)
