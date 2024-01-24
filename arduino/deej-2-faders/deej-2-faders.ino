@@ -1,6 +1,4 @@
 bool dev=0;
-bool output_controll=0;   
-const int outputs = 3; //number of outputs to cycle trough when with autput controll
 
 const int NUM_SLIDERS = 6;   //ilośc wirtualnych faderów
 const int NUM_PHYSICAL_SLIDERS=2;       //number of physical faders
