@@ -1,4 +1,6 @@
 bool dev=0;
+const int outputs = 2; //number of outputs to cycle trough when with autput controll
+int sel_out = 0;
 
 const int NUM_SLIDERS = 6;   //ilośc wirtualnych faderów
 const int NUM_PHYSICAL_SLIDERS=2;       //number of physical faders
@@ -9,7 +11,7 @@ const int dt[NUM_PHYSICAL_SLIDERS] = {3,6};   //dt pins for encoders
 const int sw[NUM_PHYSICAL_SLIDERS] = {4,7};  //sw pins for encoders
 const int mutebut[NUM_PHYSICAL_SLIDERS] = {8,9}; //mute buttons pins
 const int mute_led[NUM_PHYSICAL_SLIDERS] = {10,11}; //pins of mute led's
-
+const int output_controll_pin = 12;   //pin which button for controlling output is connected to
 
 const int lcd_kolumny = 16;
 const int lcd_wiersze = 2;
@@ -96,6 +98,7 @@ Encoder Enc_2(clk[1], dt[1]);
 int em_stop = 0;
 int vsw[NUM_PHYSICAL_SLIDERS] = {0,0};
 int vbut[NUM_PHYSICAL_SLIDERS] = {0,0};
+int vout = 0;
 
 void setup() {    //do przerobienia
   //screen init:
@@ -123,6 +126,7 @@ void setup() {    //do przerobienia
   pinMode(mutebut[1], INPUT);  //mute button 2
   pinMode(mute_led[0], OUTPUT); //mute led 1
   pinMode(mute_led[1], OUTPUT); //mute led 2
+  pinMode(output_controll_pin, INPUT);
   Serial.begin(9600);
 
 
@@ -238,7 +242,14 @@ void buttons(){                   //aktualizacja przycisków
   vsw[1] = digitalRead(sw[1]);
   vbut[0] = digitalRead(mutebut[0]);
   vbut[1] = digitalRead(mutebut[1]);
+  vout = digitalRead(output_controll_pin);
   updateEncod();
+  if(vout==HIGH){
+    sel_out++;
+    if(sel_out>=outputs){
+      sel_out=0;
+    }
+  }
   if(vsw[0]==LOW){
     if(slider_sel[0]==slider_new[0]){
       if(slider_lock[0]==0){
@@ -356,43 +367,19 @@ void updateSliderValues() {  //update    suwaków
       digitalWrite(mute_led[s], HIGH);
     }
   }
-
-  //*/
-  /*
-  if(SliderMutes[slider_sel[0]]==0){
-    digitalWrite(mute_led[0], LOW);
-    if(zmiana_sel[0]==0){
-      analogSliderValues[slider_sel[0]] = analogRead(analogInputs[0]);
-    }else{
-      if(can_unmute(0)==1){
-        zmiana_sel[0]=0;
-      }
-    }
-  }else{
-    analogSliderValues[slider_sel[0]] = 0;
-    digitalWrite(mute_led[0], HIGH);
-  }
-
-  if(SliderMutes[slider_sel[1]]==0){
-    digitalWrite(mute_led[1], LOW);
-    if(zmiana_sel[1]==0){
-      analogSliderValues[slider_sel[1]] = analogRead(analogInputs[1]);
-    }else{
-      if(can_unmute(1)==1){
-        zmiana_sel[1]=0;
-      }
-    }
-  }else{
-    analogSliderValues[slider_sel[1]] = 0;
-    digitalWrite(mute_led[1], HIGH);
-  }
-  //*/
 }
 
 void sendSliderValues() {   //sending results to go part of deej
   String builtString = String("");
-
-  for (int i = 0; i < NUM_SLIDERS; i++) {
+  for(int i=0; i<outputs;i++){
+    if(i==sel_out){
+      builtString += String((int)analogSliderValues[0]);
+    }else{
+      builtString+=String((int)0);
+    }
+    builtString += String("|");
+  }
+  for (int i = 1; i < NUM_SLIDERS; i++) {
     builtString += String((int)analogSliderValues[i]);
 
     if (i < NUM_SLIDERS - 1) {
