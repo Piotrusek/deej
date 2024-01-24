@@ -4,6 +4,9 @@ This is a fork of deej. Original author's version is [here](https://github.com/o
 
 deej is an **open-source hardware volume mixer** for Windows and Linux PCs. It lets you use real-life sliders (like a DJ!) to **seamlessly control the volumes of different apps** (such as your music player, the game you're playing and your voice chat session) without having to stop what you're doing.
 
+#This fork
+I started creating this fork becouse i didn't like the limitation of the fact that i can only have as much channels as much physical faders. This fork allows you to independently controll unlimited amount of apps with only 2 faders.
+
 **Join the [deej Discord server](https://discord.gg/nf88NJu) if you need help or have any questions!**
 
 [![Discord](https://img.shields.io/discord/702940502038937667?logo=discord)](https://discord.gg/nf88NJu)
