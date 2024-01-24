@@ -29,8 +29,6 @@ I started creating this fork becouse i didn't like the limitation of the fact th
   - [Software](#software)
 - [Slider mapping (configuration)](#slider-mapping-configuration)
 - [Build your own!](#build-your-own)
-  - [FAQ](#faq)
-  - [Build video](#build-video)
   - [Bill of Materials](#bill-of-materials)
   - [Thingiverse collection](#thingiverse-collection)
   - [Build procedure](#build-procedure)
@@ -39,7 +37,6 @@ I started creating this fork becouse i didn't like the limitation of the fact th
   - [Download and installation](#download-and-installation)
   - [Building from source](#building-from-source)
 - [Community](#community)
-- [License](#license)
 
 ## Features
 
@@ -61,11 +58,12 @@ deej is written in Go and [distributed](https://github.com/omriharel/deej/releas
 
 ### Hardware
 
-I don't realy know how to explain how it works becouse it is overly complicated but feel free to message me for an explenation. I'll be hapy to explain.
+I don't realy know how to explain how it works becouse it is overly complicated but feel free to message me for an explenation. I'll be hapy to help.
 
 #### Schematic
-No schematic yet
-![Hardware schematic](link)
+You can try to figure out connections from phgoto belov or go to [wokwi](https://wokwi.com/projects/384315318959019009) to trace connections one by one.
+
+![Hardware schematic](assets/messy_schematic.png)
 
 ### Software
 
@@ -122,44 +120,36 @@ Building deej is very simple. You only need a few relatively cheap parts - it's 
 
 Build deej for yourself, or as an awesome gift for your gaming buddies!
 
-### FAQ
-
-I've started a highly focused effort of writing a proper FAQ page for deej, covering many basic and advanced topics.
-
-It is still _very much a work-in-progress_, but I'm happy to [share it in its current state](./docs/faq/faq.md) in hopes that it at least covers some questions you might have.
-
-FAQ feedback in our [community Discord](https://discord.gg/nf88NJu) is strongly encouraged :)
-
-### Build video
-
-In case you prefer watching to reading, Charles from the [**Tech Always**](https://www.youtube.com/c/TechAlways) YouTube channel has made [**a fantastic video**](https://youtu.be/x2yXbFiiAeI) that covers the basics of building deej for yourself, including parts, costs, assembly and software. I highly recommend checking it out!
-
 ### Bill of Materials
 
 - An Arduino Nano, Pro Micro or Uno board
-  - I officially recommend using a Nano or a Pro Micro for their smaller form-factor, friendlier USB connectors and more analog pins. Plus they're cheaper
+  - I am using arduino Uno becouse it is the one I had on me when I started this project but I recommend using a Nano or a Pro Micro for their smaller form-factor, friendlier USB connectors and more analog pins. In the feature i am planning on moving to nano.
   - You can also use any other development board that has a Serial over USB interface
-- A few slider potentiometers, up to your number of free analog pins (the cheaper ones cost around 1-2 USD each, and come with a standard 10K Ohm variable resistor. These _should_ work just fine for this project)
+- 2 slide potentiometers
+- 16x2 lcd display with I2C interface
+- 2 rotary encoders
+- 2 buttons
+- 2 10 kOhm resistors for buttons (you can use Digital Input Pull-Up Resistor instead of resistors but you would have to change wiring of buttons a bit) [More info about Input Pull-Up Resistor](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
+Optional:
+- 2 LED + 2 resistors with at least 220 Ohms (if you use ones with higher ressistance your led will be dimmer)
   - **Important:** make sure to get **linear** sliders, not logarithmic ones! Check the product description
   - You can also use circular knobs if you like
 - Some wires
 - Any kind of box to hold everything together. **You don't need a 3D printer for this project!** It works fantastically with just a piece of cardboard or a shoebox. That being said, if you do have one, read on...
 
-### Thingiverse collection
+### Project
 
-With many different 3D-printed designs being added to our [community showcase](./community.md), it felt right to gather all of them in a Thingiverse collection for you to browse. If you have access to a 3D printer, feel free to use one of the designs in your build.
+This is a [link](https://cad.onshape.com/documents/e962826a6bddd0371af3b525/w/1bc1de2374e5e503c60dc035/e/108ce40760af3f3220ca9e50?configuration=default&renderMode=0&uiState=65b183c564f0d92ca57b1bef) to 3D model made by by me. It is shitty and honestly I wouldn't recoment using it but feel free to copy some of my ideas if you want.
 
-**[Visit our community-created design collection on Thingiverse!](https://thingiverse.com/omriharel/collections/deej)**
-
-> You can also [submit your own](https://discord.gg/nf88NJu) design to be added to the collection. Regardless, if you do upload your design to Thingiverse, _please add a `deej` tag to it so that others can find it more easily_.
+![my 3D model](assets/3d_model_image.png)
 
 
 ### Build procedure
 
 - Connect everything according to the [schematic](#schematic)
 - Test with a multimeter to be sure your sliders are hooked up correctly
-- Flash the Arduino chip with the sketch in [`arduino\deej-5-sliders-vanilla`](./arduino/deej-5-sliders-vanilla/deej-5-sliders-vanilla.ino)
-  - _Important:_ If you have more or less than 5 sliders, you must edit the sketch to match what you have
+- Flash the Arduino chip with the sketch in [`arduino\deej-2-faders`](./arduino/deej-2-faders/deej-2-faders.ino)
+  - _Important:_ If you have more or less than 2 sliders, you must edit the sketch to match what you have
 - After flashing, check the serial monitor. You should see a constant stream of values separated by a pipe (`|`) character, e.g. `0|240|1023|0|483`
   - When you move a slider, its corresponding value should move between 0 and 1023
 - Congratulations, you're now ready to run the deej executable!
@@ -174,40 +164,29 @@ With many different 3D-printed designs being added to our [community showcase](.
 
 #### Linux
 
-- Install `libgtk-3-dev`, `libappindicator3-dev` and `libwebkit2gtk-4.0-dev` for system tray support. Pre-built Linux binaries aren't currently released, so you'll need to [build from source](#building-from-source). If there's demand for pre-built binaries, please [let me know](https://discord.gg/nf88NJu)!
+- [go to to original author to check the requirments for linux](https://github.com/omriharel/deej?tab=readme-ov-file#requirements)
 
 ### Download and installation
 
-- Head over to the [releases page](https://github.com/omriharel/deej/releases) and download the [latest version](https://github.com/omriharel/deej/releases/latest)'s executable and configuration file (`deej.exe` and `config.yaml`)
-- Place them in the same directory anywhere on your machine
-- (Optional, on Windows) Create a shortcut to `deej.exe` and copy it to `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` to have deej run on boot
+- [go to to original author to check the requirments for linux](https://github.com/omriharel/deej?tab=readme-ov-file#requirements)
+
 
 ### Building from source
 
-If you'd rather not download a compiled executable, or want to extend deej or modify it to your needs, feel free to clone the repository and build it yourself. All you need is a Go 1.14 (or above) environment on your machine. If you go this route, make sure to check out the [developer scripts](./pkg/deej/scripts).
+If you'd rather not download a compiled executable, or want to extend deej or modify it to your needs, feel free to clone the repository and build it yourself. That's what author said. I **didn't** modify Go part of deej for my fork so I'd recomend you copy from the source. All you need is a Go 1.14 (or above) environment on your machine. If you go this route, make sure to check out the [developer scripts](https://github.com/omriharel/deej/tree/master/pkg/deej/scripts).
 
 Like other Go packages, you can also use the `go get` tool: `go get -u github.com/omriharel/deej`. Please note that the package code now resides in the `pkg/deej` directory, and needs to be imported from there if used inside another project.
 
-If you need any help with this, please [join our Discord server](https://discord.gg/nf88NJu).
+If you need any help with this, please [join deej Discord server](https://discord.gg/nf88NJu).
 
 ## Community
 
 [![Discord](https://img.shields.io/discord/702940502038937667?logo=discord)](https://discord.gg/nf88NJu)
 
-deej is a relatively new project, but a vibrant and awesome community is rapidly growing around it. Come hang out with us in the [deej Discord server](https://discord.gg/nf88NJu), or check out a whole bunch of cool and creative builds made by our members in the [community showcase](./community.md).
+deej is a relatively new project, but a vibrant and awesome community is rapidly growing around it. Come hang out with us in the [deej Discord server](https://discord.gg/nf88NJu), or check out a whole bunch of cool and creative builds made by our members in the [community showcase](https://github.com/omriharel/deej/blob/master/community.md).
 
 The server is also a great place to ask questions, suggest features or report bugs (but of course, feel free to use GitHub if you prefer).
 
 ### Donations
 
-If you love deej and want to show your support for this project, you can do so using the link below. Please don't feel obligated to donate - building the project and telling your friends about it goes a very long way! Thank you very much.
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/omriharel)
-
-### Contributing
-
-Please see [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
-
-## License
-
-deej is released under the [MIT license](./LICENSE).
+I don't take donations but if you want to support authior fo this awesome project go [here](https://github.com/omriharel/deej/tree/master?tab=readme-ov-file#community) (it's not any sketchy link, just link to authirs page).
