@@ -58,8 +58,6 @@ deej is written in Go and [distributed](https://github.com/omriharel/deej/releas
 - Runs from your system tray
 - Helpful notifications to let you know if something isn't working
 
-> **Looking for the older Python version?** It's no longer maintained, but you can always find it in the [`legacy-python` branch](https://github.com/omriharel/deej/tree/legacy-python).
-
 ## How it works
 
 ### Hardware
