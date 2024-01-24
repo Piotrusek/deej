@@ -8,9 +8,7 @@ deej is an **open-source hardware volume mixer** for Windows and Linux PCs. It l
 
 [![Discord](https://img.shields.io/discord/702940502038937667?logo=discord)](https://discord.gg/nf88NJu)
 
-deej consists of a [lightweight desktop client](#features) written in Go, and an Arduino-based hardware setup that's simple and cheap to build. [**Check out some versions built by members of our community!**](./community.md)
-
-**[Download the latest release](https://github.com/omriharel/deej/releases/latest) | [Video demonstration](https://youtu.be/VoByJ4USMr8) | [Build video by Tech Always](https://youtu.be/x2yXbFiiAeI)**
+deej consists of a [lightweight desktop client](#features) written in Go, and an Arduino-based hardware setup that's simple and cheap to build. [**Check out some versions built by members of our community!**](https://github.com/omriharel/deej/blob/master/community.md)
 
 ![deej](assets/build-3d-annotated.png)
 
@@ -18,6 +16,7 @@ deej consists of a [lightweight desktop client](#features) written in Go, and an
 
 # This fork
 I started creating this fork becouse i didn't like the limitation of the fact that i can only have as much channels as much physical faders. This fork allows you to independently controll unlimited amount of apps with only 2 faders.
+There is one additional feature compared to other branc of this fork. There is one additional button which you can use to switch output device.
 
 
 ## Table of contents
@@ -61,14 +60,14 @@ deej is written in Go and [distributed](https://github.com/omriharel/deej/releas
 I don't realy know how to explain how it works becouse it is overly complicated but feel free to message me for an explenation. I'll be hapy to help.
 
 #### Schematic
-You can try to figure out connections from phgoto belov or go to [wokwi](https://wokwi.com/projects/384315318959019009) to trace connections one by one.
+You can try to figure out connections from phgoto belov or go to [wokwi](https://wokwi.com/projects/387834395532414977) to trace connections one by one.
 
 ![Hardware schematic](assets/messy_schematic.png)
 
 ### Software
 
 - The code running on the Arduino board is a [C program](./arduino/deej-2-faders/deej-2-faders.ino) constantly writing current slider values over its serial interface
-- The PC runs a lightweight [Go client](./pkg/deej/cmd/main.go) in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
+- The PC runs a lightweight Go client in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
 
 ## Slider mapping (configuration)
 
@@ -76,15 +75,17 @@ deej uses a simple YAML-formatted configuration file named [`config.yaml`](./con
 
 The config file determines which applications (and devices) are mapped to which sliders, and which parameters to use for the connection to the Arduino board, as well as other user preferences.
 
+Make sure that first in the congfig are the names of devices that you want to be mapped to output controll button and that you change *const int outputs* in arduino code to number of devices that you map
+
 **This file auto-reloads when its contents are changed, so you can change application mappings on-the-fly without restarting deej.**
 
 It looks like this:
 
 ```yaml
 slider_mapping:
-  0: master
-  1: chrome.exe
-  2: spotify.exe
+  0: Speakers
+  1: Headphones
+  2: chrome.exe
   3:
     - pathofexile_x64.exe
     - rocketleague.exe
@@ -102,7 +103,7 @@ baud_rate: 9600
 noise_reduction: default
 ```
 
-- `master` is a special option to control the master volume of the system _(uses the default playback device)_
+- `master` is a special option to control the master volume of the system _(uses the default playback device)_  (I don't recomend using it inm this version)
 - `mic` is a special option to control your microphone's input level _(uses the default recording device)_
 - `deej.unmapped` is a special option to control all apps that aren't bound to any slider ("everything else")
 - On Windows, `deej.current` is a special option to control whichever app is currently in focus
@@ -128,8 +129,8 @@ Build deej for yourself, or as an awesome gift for your gaming buddies!
 - 2 slide potentiometers
 - 16x2 lcd display with I2C interface
 - 2 rotary encoders
-- 2 buttons
-- 2 10 kOhm resistors for buttons (you can use Digital Input Pull-Up Resistor instead of resistors but you would have to change wiring of buttons a bit) [More info about Input Pull-Up Resistor](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
+- 3 buttons
+- 3 10 kOhm resistors for buttons (you can use Digital Input Pull-Up Resistor instead of resistors but you would have to change wiring of buttons a bit) [More info about Input Pull-Up Resistor](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
 Optional:
 - 2 LED + 2 resistors with at least 220 Ohms (if you use ones with higher ressistance your led will be dimmer)
   - **Important:** make sure to get **linear** sliders, not logarithmic ones! Check the product description
