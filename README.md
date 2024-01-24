@@ -189,4 +189,4 @@ The server is also a great place to ask questions, suggest features or report bu
 
 ### Donations
 
-I don't take donations but if you want to support authior fo this awesome project go [here](https://github.com/omriharel/deej/tree/master?tab=readme-ov-file#community) (it's not any sketchy link, just link to authirs page).
+I don't take donations but if you want to support author of this awesome project go [here](https://github.com/omriharel/deej/tree/master?tab=readme-ov-file#community) (it's not any sketchy link, just link to authirs page).
