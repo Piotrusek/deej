@@ -67,7 +67,7 @@ You can try to figure out connections from phgoto belov or go to [wokwi](https:/
 ### Software
 
 - The code running on the Arduino board is a [C program](./arduino/deej-2-faders/deej-2-faders.ino) constantly writing current slider values over its serial interface
-- The PC runs a lightweight [Go client](./pkg/deej/cmd/main.go) in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
+- The PC runs a lightweight Go client in the background. This client reads the serial stream and adjusts app volumes according to the given configuration file
 
 ## Slider mapping (configuration)
 
