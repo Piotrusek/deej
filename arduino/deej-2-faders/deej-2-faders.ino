@@ -1,12 +1,30 @@
-bool dev=0;
+int dev=0; // 0- normalny, 1- cisza na serialu,m 2- pin state
+
+bool settings=0;
+int setting_enter=0;
+bool is_going_down=0;
+int displayed;
+int selected=0;
+int last_selected;
+int setting[3];   
+void settings_setup_default(){
+  setting[0]=0;   //what is dsiplayed on screen (0 - basic, 1 - devmode 2)
+  setting[1]=1;   //backlight for lcd
+}
+void settings_setup_preset_1(){
+
+}
+void settings_setup_preset_2(){
+  
+}
 
 const int NUM_SLIDERS = 6;   //ilośc wirtualnych faderów
 const int NUM_PHYSICAL_SLIDERS=2;       //number of physical faders
 const int analogInputs[NUM_PHYSICAL_SLIDERS] = {A1, A2};   //adresses of physical faders
 
 const int clk[NUM_PHYSICAL_SLIDERS] = {2,5};   //clk for encoders
-const int dt[NUM_PHYSICAL_SLIDERS] = {3,6};   //dt pins for encoders
-const int sw[NUM_PHYSICAL_SLIDERS] = {4,7};  //sw pins for encoders
+const int dt[NUM_PHYSICAL_SLIDERS] = {4,6};   //dt pins for encoders
+const int sw[NUM_PHYSICAL_SLIDERS] = {3,7};  //sw pins for encoders
 const int mutebut[NUM_PHYSICAL_SLIDERS] = {8,9}; //mute buttons pins
 const int mute_led[NUM_PHYSICAL_SLIDERS] = {10,11}; //pins of mute led's
 
@@ -14,8 +32,9 @@ const int mute_led[NUM_PHYSICAL_SLIDERS] = {10,11}; //pins of mute led's
 const int lcd_kolumny = 16;
 const int lcd_wiersze = 2;
 
-String channel_list[NUM_SLIDERS] = {"Master        ","Discord       ","Muzyka        ","Gry           ","Opera         ","System        "}; //make sure all sources have lcd_kolumny-2 znaków
-
+const int settings_amount=4;
+String channel_list[NUM_SLIDERS] = {"Master     ","Opera      ","Muzyka     ","Gry        ","Discord    ","System     "}; //make sure all sources have lcd_kolumny-2 characters
+String settings_list[5] = {"Serial out     ","Display         ","LCD backlight   ","Save & exit     ","Fifth           "};
 
 #include <Encoder.h>
 #include <Wire.h> 
@@ -69,14 +88,14 @@ bool migState = 0;      //variable responsible for blinking LED/screen
 unsigned long previousMillisblink = 0;  //zapisywanie czasu ostatniego mignięcia
 const long blink_interval = 500;    //czas migania ikon ekranu/diod
 const long reset_interval = 5000;   //czas po którym maja się wyzerować encodery po bezczynności
-const long cooldown = 500;      //minimalny czas między kliknięciami
+const long cooldown = 100;      //minimalny czas między kliknięciami
 unsigned long currentMillis = millis();     //aktualny czas
 unsigned long settimemillis = millis();     //zapisywanie czasu ostatniej aktywności
 unsigned long previousclick = millis();     //zapisywanie czasu ostatniego kliknięcia jakiegokoliwke przycisku
 
 LiquidCrystal_I2C lcd(0x27,lcd_kolumny,lcd_wiersze);     //definiwoanie ekranu (adres, kolumny, rzędy)
 
-int analogSliderValues[NUM_SLIDERS];    //główna zmienna któa jest wysyłana cały czas i zapisuje wartości sliderów (wirtualnych)
+int analogSliderValues[NUM_SLIDERS] = {0, 520, 520, 520, 520, 520};    //główna zmienna któa jest wysyłana cały czas i zapisuje wartości sliderów (wirtualnych)
 bool SliderMutes[NUM_SLIDERS] = {0, 0, 0, 0, 0, 0};     //zmienna mówiąca czy slidery są wyciszone czy nie
 
 int slider_sel[NUM_PHYSICAL_SLIDERS] = {0, 1};      //które wirtualne slidery są aktualnie wybrane do kontroli
@@ -87,17 +106,17 @@ bool slider_lock[NUM_PHYSICAL_SLIDERS] = {0, 0};    //czy kanał fizyczny enkode
 long oldPosition[NUM_PHYSICAL_SLIDERS]  = {-999,-999};  //enkoderowe zapisywanie porzedniego miejsca
 long newPosition[NUM_PHYSICAL_SLIDERS];     //enkoderowe zapisywanie aktualnego miejsca
 
-//definiwoanie enkoderów
+//definition of encoders
 Encoder Enc_1(clk[0], dt[0]);     
 Encoder Enc_2(clk[1], dt[1]);
 
 
-//definiowanie przyciksków (wartości czy jest kliknięty)
+//definig of buttons (values checking if it is pressed)
 int em_stop = 0;
 int vsw[NUM_PHYSICAL_SLIDERS] = {0,0};
 int vbut[NUM_PHYSICAL_SLIDERS] = {0,0};
 
-void setup() {    //do przerobienia
+void setup() {
   //screen init:
   lcd.init();
   lcd.createChar(0, lock_ico);
@@ -105,7 +124,6 @@ void setup() {    //do przerobienia
   lcd.createChar(2, up_down_arrows_ico);
   lcd.createChar(3, mute_ico);
   lcd.backlight();
-  
   lcd.setCursor(5,0);
   lcd.print("MixPad");
 
@@ -119,36 +137,211 @@ void setup() {    //do przerobienia
   pinMode(clk[1], INPUT);  //CLK encoder 2
   pinMode(dt[1], INPUT);  //DT encoder 2
   pinMode(sw[1], INPUT_PULLUP); //SW encoder 2
-  pinMode(mutebut[0], INPUT);  //mute button 1
-  pinMode(mutebut[1], INPUT);  //mute button 2
+  pinMode(mutebut[0], INPUT_PULLUP);  //mute button 1
+  pinMode(mutebut[1], INPUT_PULLUP);  //mute button 2
   pinMode(mute_led[0], OUTPUT); //mute led 1
   pinMode(mute_led[1], OUTPUT); //mute led 2
   Serial.begin(9600);
 
 
-  delay(2500);
-  /*
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(" Values you see");
-  lcd.setCursor(0,1);
-  lcd.print("are NOT accurate");
-  while(digitalRead(sw[0]) != LOW && digitalRead(sw[1]) != LOW && digitalRead(mutebut[0]) == LOW && digitalRead(mutebut[1]) == LOW) {}  //wait for anything to bo clicked
-  delay(1000);
-  //*/
+  delay(500);
+  
+  //settings setup:
+  if(digitalRead(mutebut[1])==LOW){
+    settings_setup_preset_2();
+  }else{
+    if(digitalRead(mutebut[0])==LOW){
+      settings_setup_preset_1();
+    }else{
+    settings_setup_default();
+    }
+  }
   lcd.clear();
 }
-  
-void loop() {
+
+void main_loop(){
   currentMillis = millis();         //ustawianie czasu  
   updateSliderValues();             //zczytanie wartości ze sliderów fizycznych
-  sendSliderValues();               // Actually send data (all the time)
-  screenupdate();                   //aktualizacja ekranu
+  switch(dev){
+    case 0:
+      sendSliderValues();
+      break;
+    case 1:
+      break;
+    case 2:
+      printPinState();
+      break;
+  }
+  switch(setting[0]){
+    case 0:
+      screenupdate();                   //aktualizacja ekranu
+      break;
+    case 1:
+      screen_devmode();
+      break;
+  }
   //printSliderValues();        // For debug
   canceling_change_function();      //Jeśłi nie zatwierdzono zmiany to reset enkoderów
   button_spam();                    //Wywoałanie przycisków
   delay(10);                        //small delay so that arduino could rest a while
+  if(dev==1){
+    delay(1000);
+  }
+}
+
+void screen_devmode(){
+  lcd.setCursor(0,0);
+  for(int i=2;i<5;i++){
+    int x=digitalRead(i);
+    lcd.print(x);
+  }
+  lcd.print(" ");
+  for(int i=5;i<8;i++){
+    int x=digitalRead(i);
+    lcd.print(x);
+  }
+  lcd.print(" ");
+  for(int i=8;i<10;i++){
+    int x=digitalRead(i);
+    lcd.print(x);
+  }
+  lcd.print(" ");
+  for(int i=10;i<12;i++){
+    int x=digitalRead(i);
+    lcd.print(x);
+  }
+  lcd.setCursor(0,1);
+  lcd.print(analogRead(A1));
+  if(analogRead(A1)<1000){
+    lcd.print(" ");
+    if(analogRead(A1)<100){
+      lcd.print(" ");
+      if(analogRead(A1)<10){
+        lcd.print(" ");
+      }
+    }
+  }
+  lcd.print(" ");
+  lcd.print(analogRead(A2));
+  if(analogRead(A2)<1000){
+    lcd.print(" ");
+    if(analogRead(A2)<100){
+      lcd.print(" ");
+      if(analogRead(A2)<10){
+        lcd.print(" ");
+      }
+    }
+  }
+}
+
+void loop() {
+  if(setting_enter>=22||(setting_enter>=4&&dev==1)){
+    setting_enter=0;
+    settings=1;
+    lcd.clear();
+    lcd.setCursor(4,0);
+    lcd.print("Settings");
+    delay(750);
+    lcd.clear();
+    is_going_down=0;
+    displayed=0;
+    last_selected=0;
+  }
+  if(settings){
+    if(digitalRead(sw[0])==LOW&&digitalRead(sw[1])==LOW){
+      Serial.println("Closed settings");
+      lcd.clear();
+      lcd.setCursor(6, 0);
+      lcd.print("Saved");
+      delay(750);
+      lcd.clear();
+      settings=0;
+    }
+    settings_screen();
+  }else{
+    if(digitalRead(mutebut[0])==LOW&&digitalRead(mutebut[1])==LOW){
+      setting_enter++;
+    }else{
+      setting_enter=0;
+    }
+    main_loop();
+  }
 } 
+
+void settings_screen(){
+  if(digitalRead(mutebut[0])!=LOW&&digitalRead(mutebut[1])!=LOW){
+    selected=map(analogRead(analogInputs[0]),0,1000,settings_amount-1,0);
+    digitalWrite(mute_led[0],LOW);
+    digitalWrite(mute_led[1],LOW);
+  }else{
+    digitalWrite(mute_led[0],HIGH);
+    digitalWrite(mute_led[1],HIGH);
+  }
+  if(last_selected>selected){
+    is_going_down=0;
+  }else{
+    if(last_selected<selected){
+      is_going_down=1;
+    }
+  }
+  if(is_going_down){
+    lcd.setCursor(0,0);
+    lcd.print(" ");
+    lcd.print(settings_list[selected-1]);
+    lcd.setCursor(0,1);
+    lcd.print(">");
+    lcd.print(settings_list[selected]);
+  }else{
+    lcd.setCursor(0,0);
+    lcd.print(">");
+    lcd.print(settings_list[selected]);
+    lcd.setCursor(0,1);
+    lcd.print(" ");
+    lcd.print(settings_list[selected+1]);
+  }
+  last_selected=selected;
+  int second_slider=analogRead(analogInputs[1]);
+  if(digitalRead(mutebut[0])==LOW||digitalRead(mutebut[1])==LOW){
+    switch(selected){
+      case 0:
+        dev = map(second_slider,0,900,0,2);
+        break;
+      case 1:
+        setting[0] = map(second_slider,0,900,0,1);
+        break;
+      case 2:
+        setting[1] = map(second_slider,0,200,0,1);
+        if(setting[1]>1){
+          setting[1]=1;
+        }
+        if(setting[1]==0){
+          lcd.noBacklight();
+        }else{
+          lcd.backlight();
+        }
+        break;
+
+      case settings_amount-1:
+        Serial.println("Closed settings");
+        settings=0;
+        lcd.clear();
+        lcd.setCursor(6, 0);
+        lcd.print("Saved");
+        delay(750);
+        lcd.clear();
+        break;
+    }
+  }
+  settings_list[0] = "Serial out    ";
+  settings_list[0] += (int)dev;
+  settings_list[0] += (" ");
+  settings_list[1] = "Display       ";
+  settings_list[1] += (int)setting[0];
+  settings_list[1] += (" ");
+  settings_list[2] = "LCD backlight ";
+  settings_list[2] += (int)setting[1];
+  settings_list[2] += (" ");
+}
 
 void button_spam(){                 //ochrona przed spamowaniem
   if (currentMillis - previousclick >= cooldown){   //jeśli czas od osytatniego klikniecia za mały to żeby nie wywoływało funckji
@@ -207,9 +400,10 @@ void screen_icon_loader(){          //sprawdzanie któe ikonki mają się wyświ
       }
     }
     if(SliderMutes[slider_sel[i]]==1){
-      lcd.setCursor(lcd_kolumny-3,i);
-      lcd.write(byte(3));
+        lcd.setCursor(lcd_kolumny-3,i);
+        lcd.write(byte(3));
     }
+
   }
 }
 
@@ -285,7 +479,7 @@ void buttons(){                   //aktualizacja przycisków
     }
     previousclick=millis();
   }
-  if(vbut[0]==HIGH){
+  if(vbut[0]==LOW){
     if(SliderMutes[slider_sel[0]]==0){
       SliderMutes[slider_sel[0]]=1;
     }else{
@@ -293,7 +487,7 @@ void buttons(){                   //aktualizacja przycisków
     }
     previousclick=millis();
   }
-  if(vbut[1]==HIGH){
+  if(vbut[1]==LOW){
     if(SliderMutes[slider_sel[1]]==0){
       SliderMutes[slider_sel[1]]=1;
     }else{
@@ -304,13 +498,14 @@ void buttons(){                   //aktualizacja przycisków
 }
 
 void screenupdate(){              //wypisanie na ekran
+  if(dev==1)
+    Serial.println("funckja screen update wywołanie");
   for(int i=0;i<NUM_PHYSICAL_SLIDERS;i++){
     lcd.setCursor(0,i);
     lcd.print(channel_list[slider_new[i]]);
   }
-  
-  for(int i=0;i<NUM_PHYSICAL_SLIDERS;i++){          //wypisanie aktualnej głośności
-    int v1 = map(analogSliderValues[slider_sel[i]], 10, 1020, 0, 100);
+    for(int i=0;i<NUM_PHYSICAL_SLIDERS;i++){          //wypisanie aktualnej głośności
+      int v1 = map(analogSliderValues[slider_sel[i]], 10, 1020, 0, 100);
     lcd.setCursor(lcd_kolumny-5,i);
     if(SliderMutes[slider_sel[i]]==0){
       if(v1==100){
@@ -340,53 +535,25 @@ int can_unmute(int i){            //sprawdzanie czy można zwócić kontrolę da
 }
 
 void updateSliderValues() {  //update    suwaków
-//*
   for(int s=0;s<NUM_PHYSICAL_SLIDERS;s++){
     if(SliderMutes[slider_sel[s]]==0){
       digitalWrite(mute_led[s], LOW);
       if(zmiana_sel[s]==0){
         analogSliderValues[slider_sel[s]] = analogRead(analogInputs[s]);
       }else{
-        if(analogSliderValues[slider_sel[s]]-30<analogRead(analogInputs[s])&&analogSliderValues[slider_sel[s]]+30>analogRead(analogInputs[s])==1){
+        if(dev==1){
+          Serial.println("There was a change");
+        }
+        if(can_unmute(s)==1){
           zmiana_sel[s]=0;
         }
       }
     }else{
       analogSliderValues[slider_sel[s]] = 0;
       digitalWrite(mute_led[s], HIGH);
+      zmiana_sel[s]=0;
     }
   }
-
-  //*/
-  /*
-  if(SliderMutes[slider_sel[0]]==0){
-    digitalWrite(mute_led[0], LOW);
-    if(zmiana_sel[0]==0){
-      analogSliderValues[slider_sel[0]] = analogRead(analogInputs[0]);
-    }else{
-      if(can_unmute(0)==1){
-        zmiana_sel[0]=0;
-      }
-    }
-  }else{
-    analogSliderValues[slider_sel[0]] = 0;
-    digitalWrite(mute_led[0], HIGH);
-  }
-
-  if(SliderMutes[slider_sel[1]]==0){
-    digitalWrite(mute_led[1], LOW);
-    if(zmiana_sel[1]==0){
-      analogSliderValues[slider_sel[1]] = analogRead(analogInputs[1]);
-    }else{
-      if(can_unmute(1)==1){
-        zmiana_sel[1]=0;
-      }
-    }
-  }else{
-    analogSliderValues[slider_sel[1]] = 0;
-    digitalWrite(mute_led[1], HIGH);
-  }
-  //*/
 }
 
 void sendSliderValues() {   //sending results to go part of deej
@@ -403,7 +570,7 @@ void sendSliderValues() {   //sending results to go part of deej
   Serial.println(builtString);
 }
 
-void printSliderValues() {      //drukowanie co jest (do debugowania)
+void printSliderValues() {      //printing values of faders for debug
   for (int i = 0; i < NUM_SLIDERS; i++) {
     String printedString = String("Slider #") + String(i + 1) + String(": Muted?:")+ String(SliderMutes[i]) + String(": ") + String(analogSliderValues[i]) + String(" mV");
     Serial.write(printedString.c_str());
@@ -417,3 +584,23 @@ void printSliderValues() {      //drukowanie co jest (do debugowania)
   delay(100);
 }
 
+void printPinState(){
+  for(int i=2;i<12;i++){
+    int x=digitalRead(i);
+    Serial.print(x);
+    Serial.print(" | ");
+  }
+  Serial.print(analogRead(A0));
+  Serial.print(" | ");
+  Serial.print(analogRead(A1));
+  Serial.print(" | ");
+  Serial.print(analogRead(A2));
+  Serial.print(" | ");
+  Serial.print(analogRead(A3));
+  Serial.print(" | ");
+  Serial.print(analogRead(A4));
+  Serial.print(" | ");
+  Serial.print(analogRead(A5));
+  Serial.print(" | ");
+  Serial.println();
+}
