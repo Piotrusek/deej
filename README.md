@@ -122,7 +122,7 @@ Build deej for yourself, or as an awesome gift for your gaming buddies!
 ### Bill of Materials
 
 - An Arduino Nano, Pro Micro or Uno board
-  - I am using arduino Uno becouse it is the one I had on me when I started this project but I recommend using a Nano or a Pro Micro for their smaller form-factor, friendlier USB connectors and more analog pins. In the feature i am planning on moving to nano.
+  - I am using arduino nano due to small size and USB-C.
   - You can also use any other development board that has a Serial over USB interface
 - 2 slide potentiometers
 - 16x2 lcd display with I2C interface
@@ -132,7 +132,6 @@ Build deej for yourself, or as an awesome gift for your gaming buddies!
 Optional:
 - 2 LED + 2 resistors with at least 220 Ohms (if you use ones with higher ressistance your led will be dimmer)
   - **Important:** make sure to get **linear** sliders, not logarithmic ones! Check the product description
-  - You can also use circular knobs if you like
 - Some wires
 - Any kind of box to hold everything together. **You don't need a 3D printer for this project!** It works fantastically with just a piece of cardboard or a shoebox. That being said, if you do have one, read on...
 
@@ -165,18 +164,7 @@ This is a [link](https://cad.onshape.com/documents/e962826a6bddd0371af3b525/w/1b
 
 - [go to to original author to check the requirments for linux](https://github.com/omriharel/deej?tab=readme-ov-file#requirements)
 
-### Download and installation
 
-- [go to to original author to check the requirments for linux](https://github.com/omriharel/deej?tab=readme-ov-file#requirements)
-
-
-### Building from source
-
-If you'd rather not download a compiled executable, or want to extend deej or modify it to your needs, feel free to clone the repository and build it yourself. That's what author said. I **didn't** modify Go part of deej for my fork so I'd recomend you copy from the source. All you need is a Go 1.14 (or above) environment on your machine. If you go this route, make sure to check out the [developer scripts](https://github.com/omriharel/deej/tree/master/pkg/deej/scripts).
-
-Like other Go packages, you can also use the `go get` tool: `go get -u github.com/omriharel/deej`. Please note that the package code now resides in the `pkg/deej` directory, and needs to be imported from there if used inside another project.
-
-If you need any help with this, please [join deej Discord server](https://discord.gg/nf88NJu).
 
 ## Community
 
@@ -188,4 +176,4 @@ The server is also a great place to ask questions, suggest features or report bu
 
 ### Donations
 
-I don't take donations but if you want to support author of this awesome project go [here](https://github.com/omriharel/deej/tree/master?tab=readme-ov-file#community) (it's not any sketchy link, just link to authirs page).
+I don't take donations but if you want to support author of this awesome project go [here](https://github.com/omriharel/deej/tree/master?tab=readme-ov-file#community) (it's not any sketchy link, just link to authors page).
